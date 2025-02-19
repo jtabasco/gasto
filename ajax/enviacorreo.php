@@ -28,5 +28,5 @@
             	$enviado=true;
             };	
          
-      cho json_encode($enviado);
+      echo json_encode($enviado);
  ?>
