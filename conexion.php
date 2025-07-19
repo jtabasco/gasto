@@ -11,7 +11,7 @@ class Database {
     private function __construct() {
         $servername = "jtabasco.com";
         $username = "u338215117_joelgasto";
-        $password = "c4C~=ns+L=";
+        $password = "";
         $dbname = "u338215117_gastos";
         
         $this->conn = new mysqli($servername, $username, $password, $dbname);
