@@ -1,0 +1,11 @@
+# Imagen de prueba para MMS
+# Este archivo simula una imagen JPEG
+# En producción, aquí estaría el contenido binario real
+
+DATOS_DE_PRUEBA:
+- Nombre: test_image.jpg
+- Propósito: Testing MMS
+- Fecha: <?php echo date('Y-m-d H:i:s'); ?>
+
+Este archivo permite probar la funcionalidad MMS
+sin necesidad de una imagen real. 

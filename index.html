@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GastoApp - Gestión de Gastos Compartidos</title>
+    <!-- Bootstrap 5 y Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/css/iziToast.min.css">
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #8b5cf6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-color: #1f2937;
+            --light-color: #f9fafb;
+            --border-radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--border-radius);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 450px;
+            width: 100%;
+            padding: 3rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--success-color));
+        }
+
+        .brand-section {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .brand-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .brand-icon i {
+            font-size: 2.5rem;
+            color: white;
+        }
+
+        .brand-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-subtitle {
+            color: #6b7280;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.75rem;
+            display: block;
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: stretch;
+            height: 48px;
+        }
+
+        .input-group:focus-within {
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .input-group-text {
+            background: white;
+            border: none;
+            color: #9ca3af;
+            font-size: 1.1rem;
+            padding: 0.75rem 1rem;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .input-group:focus-within .input-group-text {
+            color: var(--primary-color);
+        }
+
+        .form-control {
+            border: none;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-control:focus {
+            box-shadow: none;
+            background: white;
+        }
+
+        .password-toggle {
+            background: white;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 0.75rem 1rem;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: white;
+            width: 100%;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+            color: white;
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .forgot-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-link:hover {
+            color: var(--secondary-color);
+        }
+
+        .btn-donate {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-donate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+            color: white;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .feature-item {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                min-height: 100vh;
+                overflow: visible;
+            }
+
+            .login-container {
+                padding: 0;
+                min-height: 100vh;
+                width: 100vw;
+                display: flex;
+                align-items: flex-start;
+                justify-content: center;
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+            }
+
+            .login-card {
+                padding: 1rem 0.75rem;
+                margin: 0;
+                width: 100%;
+                min-height: 100vh;
+                max-width: none;
+                border-radius: 0;
+                overflow-y: visible;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                padding-top: 2rem;
+                padding-bottom: 2rem;
+            }
+
+            .brand-section {
+                margin-bottom: 1rem;
+                flex-shrink: 0;
+            }
+
+            .brand-icon {
+                width: 50px;
+                height: 50px;
+                margin-bottom: 0.5rem;
+            }
+
+            .brand-icon i {
+                font-size: 1.5rem;
+            }
+
+            .brand-title {
+                font-size: 1.25rem;
+                margin-bottom: 0.1rem;
+            }
+
+            .brand-subtitle {
+                font-size: 0.8rem;
+            }
+
+            form {
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                gap: 1rem;
+                width: 100%;
+            }
+
+            .form-group {
+                margin-bottom: 0.75rem;
+            }
+
+            .form-label {
+                font-size: 0.8rem;
+                margin-bottom: 0.25rem;
+            }
+
+            .input-group {
+                border-radius: 6px;
+                height: 40px;
+            }
+
+            .input-group-text {
+                padding: 0.4rem 0.5rem;
+                font-size: 0.9rem;
+                height: 100%;
+            }
+
+            .form-control {
+                padding: 0.4rem 0.5rem;
+                font-size: 0.85rem;
+                height: 100%;
+            }
+
+            .btn-login {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+                margin-bottom: 1rem;
+            }
+
+            .btn-donate {
+                padding: 0.4rem 0.5rem;
+                font-size: 0.8rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .forgot-link {
+                font-size: 0.75rem;
+                margin-bottom: 1rem;
+            }
+
+            .features-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.25rem;
+                margin-top: 1rem;
+                padding-top: 1rem;
+                flex-shrink: 0;
+                margin-bottom: 1rem;
+            }
+
+            .feature-item {
+                font-size: 0.6rem;
+            }
+
+            .feature-icon {
+                font-size: 1rem;
+                margin-bottom: 0.1rem;
+            }
+
+            /* Ocultar elementos flotantes en móvil para ahorrar espacio */
+            .floating-element {
+                display: none;
+            }
+
+            /* Asegurar que el contenido no se desborde */
+            .login-card::-webkit-scrollbar {
+                width: 0px;
+                background: transparent;
+            }
+        }
+
+        /* Para pantallas muy pequeñas (menos de 320px) */
+        @media (max-width: 320px) {
+            .login-card {
+                padding: 0.5rem;
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+                justify-content: flex-start;
+            }
+
+            .brand-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .brand-icon i {
+                font-size: 1.25rem;
+            }
+
+            .brand-title {
+                font-size: 1.1rem;
+            }
+
+            .brand-subtitle {
+                font-size: 0.75rem;
+            }
+
+            .form-control {
+                font-size: 0.8rem;
+            }
+
+            .btn-login {
+                font-size: 0.85rem;
+            }
+
+            .features-grid {
+                gap: 0.1rem;
+            }
+
+            .feature-item {
+                font-size: 0.55rem;
+            }
+        }
+
+        /* Animaciones */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Floating elements */
+        .floating-element {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            top: 20%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .floating-element:nth-child(3) {
+            bottom: 20%;
+            left: 15%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Floating elements -->
+    <div class="floating-element">
+        <!-- <i class="bi bi-currency-dollar" style="font-size: 3rem; color: white;"></i> -->
+    </div>
+    <div class="floating-element">
+        <!-- <i class="bi bi-house-heart" style="font-size: 2.5rem; color: white;"></i> -->
+    </div>
+    <div class="floating-element">
+        <!-- <i class="bi bi-graph-up" style="font-size: 3rem; color: white;"></i> -->
+    </div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="brand-section">
+                <div class="brand-icon">
+                    <i class="bi bi-house-heart" style="font-size: 2.5rem; color: white;"></i>
+                </div>
+                <h1 class="brand-title">Gastos Familiares</h1>
+                <p class="brand-subtitle">Gestión inteligente de gastos compartidos</p>
+            </div>
+
+            <form method="post" id="frmAcceso">
+                <div class="form-group">
+                    <label for="username" class="form-label">
+                        <i class="bi bi-person-circle me-2"></i>Usuario o Email
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-person"></i>
+                        </span>
+                        <input type="text" class="form-control" id="username" name="username" required
+                            placeholder="Ingresa tu usuario o email">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">
+                        <i class="bi bi-shield-lock me-2"></i>Contraseña
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-lock"></i>
+                        </span>
+                        <input type="password" class="form-control" id="password" name="password" required
+                            placeholder="Ingresa tu contraseña">
+                        <button type="button" class="password-toggle" onclick="togglePassword()">
+                            <i class="bi bi-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-login">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    Iniciar Sesión
+                </button>
+
+                <div class="text-center mb-3">
+                    <a href="system/restablecer.php" class="forgot-link">
+                        <i class="bi bi-question-circle me-1"></i>
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
+
+                <a href="https://donate.stripe.com/7sI14Y91yge7bVmbIN" target="_blank" class="btn btn-donate">
+                    <i class="bi bi-heart-fill"></i>
+                    Apoyar el Proyecto
+                </a>
+            </form>
+
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="bi bi-people feature-icon"></i>
+                    <div>Gastos Compartidos</div>
+                </div>
+                <div class="feature-item">
+                    <i class="bi bi-graph-up-arrow feature-icon"></i>
+                    <div>Control Total</div>
+                </div>
+                <div class="feature-item">
+                    <i class="bi bi-bell feature-icon"></i>
+                    <div>Notificaciones</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/jquery-3.7.0.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/izitoast/1.4.0/js/iziToast.min.js"></script>
+    <script src="js/md5.min.js"></script>
+    <script src="js/valida.js"></script>
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            }
+        }
+
+
+
+        // Efecto de focus en los inputs
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,12 @@
+# Esta es una imagen de prueba para el sistema MMS
+# Contenido simulado de una imagen JPEG
+# Puedes reemplazar este archivo con una imagen real para testing
+
+DATOS_DE_PRUEBA:
+- Nombre: test_image.jpg
+- Tamaño: Simulado
+- Formato: JPEG
+- Propósito: Testing MMS
+
+Este archivo simula una imagen para pruebas del sistema MMS.
+En producción, aquí estaría el contenido binario de una imagen real. 

@@ -1,0 +1,87 @@
+
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Notificación de Transacción - Gastos Familiares</title>
+      <style>
+        body {
+          font-family: "Segoe UI", sans-serif;
+          background-color: #ffffff;
+          color: #2c3e50;
+          margin: 0; padding: 0;
+        }
+        .container {
+          max-width: 600px; margin: 0 auto; padding: 20px;
+        }
+        .header {
+          background-color: #007BFF; color: white;
+          padding: 20px; text-align: center;
+          border-radius: 10px 10px 0 0;
+        }
+        .content {
+          background-color: #f9f9f9; padding: 30px;
+          border: 1px solid #e0e0e0; border-top: none;
+          border-radius: 0 0 10px 10px;
+        }
+        .title {
+          color: #007BFF; font-size: 20px; font-weight: 600;
+          margin-bottom: 10px;
+        }
+        .label { font-weight: bold; color: #2c3e50; }
+        .amount { color: #28a745; font-weight: bold; }
+        .participants, .debts {
+          background-color: #ffffff; border: 1px solid #ddd;
+          border-radius: 6px; padding: 10px; margin-bottom: 20px;
+        }
+        .button-container {
+          text-align: center; margin: 20px 0;
+        }
+        .btn {
+          background-color: #007BFF; color: white;
+          padding: 12px 24px; text-decoration: none;
+          border-radius: 6px; display: inline-block;
+          font-weight: bold;
+        }
+        .footer {
+          text-align: center; font-size: 12px; color: #888;
+          margin-top: 30px;
+        }
+        @media (max-width:600px){
+          .container{padding:10px;}
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header"><h1>Gastos Familiares</h1></div>
+        <div class="content">
+          <div class="title">Nueva transacción registrada</div>
+          <p><span class="label">Fecha:</span> 2025-01-15</p>
+          <p><span class="label">Tipo:</span> Préstamo</p>
+          <p><span class="label">Monto total:</span> <span class="amount">$ 2,000.00</span></p>
+
+          <div class="participants">
+            <p><span class="label">Participantes:</span></p>
+            <ul>
+              <li><strong>Responsable:</strong> Pedro Sánchez</li>
+              <li>Laura Torres – Debe $1,000.00</li><li>Roberto Díaz – Debe $1,000.00</li>
+            </ul>
+          </div>
+
+          <p><span class="label">Resumen de deudas:</span></p>
+          <div class="debts">
+            <ul>
+              <li>Laura Torres → Debe: <span class="amount">$ 1,000.00</span></li><li>Roberto Díaz → Debe: <span class="amount">$ 1,000.00</span></li>
+            </ul>
+          </div>
+
+          <div class="button-container">
+            <a class="btn" href="https://jtabasco.com/gasto" target="_blank">Ver en Gastos Familiares</a>
+          </div>
+        </div>
+        <div class="footer">© 2025 Gastos Familiares · Todos los derechos reservados</div>
+      </div>
+    </body>
+    </html>
