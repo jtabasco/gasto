@@ -3,6 +3,32 @@ session_start();
 include "../conexion.php";
 //require_once '../utils/Mailer.php';
 
+// Función para dividir importe con precisión
+function dividirImporte(float $importe, int $partes): array {
+    if ($partes <= 0) {
+        return [];
+    }
+    
+    // Convertir a centimos para precisión
+    $total_centimos = (int) round($importe * 100);
+    
+    // Calcular valor base y resto
+    $base_centimos = (int) ($total_centimos / $partes);
+    $resto = $total_centimos % $partes;
+    
+    $resultado = [];
+    // Distribuir: los primeros reciben centavo extra (para que el último sea el menor)
+    for ($i = 0; $i < $partes; $i++) {
+        $centimos_actuales = $base_centimos;
+        if ($i < $resto) {
+            $centimos_actuales += 1; // Centavo extra para los primeros
+        }
+        $resultado[] = number_format($centimos_actuales / 100, 2, '.', '');
+    }
+    
+    return $resultado;
+}
+
 // Configurar zona horaria de México para que la fecha se guarde correctamente
 
 $Comprador = $_SESSION['idUser'];
@@ -38,71 +64,38 @@ try {
     $stmt->execute();
     error_log("INSERT detalle_gasto affected rows: " . $stmt->affected_rows);
 
-    // Verificar si la vista deudaXcompra existe y tiene datos
-    $sql_check = "SELECT COUNT(*) as total FROM information_schema.views WHERE table_schema = DATABASE() AND table_name = 'deudaXcompra'";
-    $result_check = $conn->query($sql_check);
-    $row_check = $result_check->fetch_assoc();
+    // Calcular monto dividido equitativamente
+    $sql = "SELECT COUNT(*) as total_deudores FROM detalle_gasto WHERE idgasto=?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $maxid);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $total_deudores = $row['total_deudores']+1;
     
-    if ($row_check['total'] > 0) {
-        // La vista existe, verificar si tiene datos para este gasto
-        $sql_check_data = "SELECT COUNT(*) as total FROM deudaXcompra WHERE id = ?";
-        $stmt_check = $conn->prepare($sql_check_data);
-        $stmt_check->bind_param("i", $maxid);
-        $stmt_check->execute();
-        $result_data = $stmt_check->get_result();
-        $row_data = $result_data->fetch_assoc();
-        
-        if ($row_data['total'] > 0) {
-            // La vista tiene datos, intentar actualizar montos
-            $sql = "UPDATE detalle_gasto c 
-                    INNER JOIN (SELECT id, deuda FROM deudaXcompra) x 
-                    ON c.idgasto = x.id
-                    SET c.monto=x.deuda
-                    WHERE c.idgasto=?";
-            $stmt = $conn->prepare($sql);
-            if ($stmt) {
-                $stmt->bind_param("i", $maxid);
-                $stmt->execute();
-                error_log("UPDATE detalle_gasto monto from view affected rows: " . $stmt->affected_rows);
-            } else {
-                error_log("Error preparando UPDATE monto from view: " . $conn->error);
-            }
-        } else {
-            // La vista existe pero no tiene datos para este gasto, calcular monto dividido
-            $sql = "SELECT COUNT(*) as total_deudores FROM detalle_gasto WHERE idgasto=?";
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("i", $maxid);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            $row = $result->fetch_assoc();
-            $total_deudores = $row['total_deudores'];
-            
-            if ($total_deudores > 0) {
-                $monto_por_persona = $Monto / $total_deudores;
-                $sql = "UPDATE detalle_gasto SET monto=? WHERE idgasto=?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param("di", $monto_por_persona, $maxid);
-                $stmt->execute();
-                error_log("UPDATE detalle_gasto monto dividido (view empty): " . $stmt->affected_rows . " filas, monto por persona: " . $monto_por_persona);
-            }
-        }
-    } else {
-        // La vista no existe, calcular monto dividido equitativamente
-        $sql = "SELECT COUNT(*) as total_deudores FROM detalle_gasto WHERE idgasto=?";
+    if ($total_deudores > 0) {
+        // Usar la función dividirImporte para obtener montos precisos
+        $montos_divididos = dividirImporte($Monto, $total_deudores);
+
+        // Obtener los registros de detalle_gasto (tantos como deudores)
+        $sql = "SELECT id FROM detalle_gasto WHERE idgasto=? ORDER BY id";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $maxid);
         $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        $total_deudores = $row['total_deudores'];
-        
-        if ($total_deudores > 0) {
-            $monto_por_persona = $Monto / $total_deudores;
-            $sql = "UPDATE detalle_gasto SET monto=? WHERE idgasto=?";
+        $result_registros = $stmt->get_result();
+
+        $registros = [];
+        while ($row_registro = $result_registros->fetch_assoc()) {
+            $registros[] = $row_registro['id'];
+        }
+
+        // Actualizar cada registro con su monto correspondiente
+        foreach ($registros as $index => $id_registro) {
+            $monto_actual = $montos_divididos[$index];
+            $sql = "UPDATE detalle_gasto SET monto=? WHERE id=?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("di", $monto_por_persona, $maxid);
+            $stmt->bind_param("di", $monto_actual, $id_registro);
             $stmt->execute();
-            error_log("UPDATE detalle_gasto monto dividido (no view): " . $stmt->affected_rows . " filas, monto por persona: " . $monto_por_persona);
         }
     }
 
@@ -822,7 +815,10 @@ try {
     $fecha_creacion = date('Y-m-d H:i:s'); // Fecha actual en zona horaria de México
     $sql = "INSERT INTO correos_pendientes (destinatario, asunto, cuerpo, fecha_creacion) VALUES ('$to', 'Notificación de deuda nueva', '$messageDeudores', '$fecha_creacion')";
     $conn->query($sql);
-    echo json_encode('ok');
+    echo json_encode([
+        'status' => 'ok',
+        'texto' => $texto
+    ]);
 } catch (Exception $e) {
     // Si hay un error, revertir la transacción
     $conn->rollback();
